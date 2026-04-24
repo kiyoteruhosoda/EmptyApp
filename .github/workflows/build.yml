@@ -116,8 +116,10 @@ jobs:
           fi
       - name: Flutter pub get
         run: flutter pub get
-      - name: Generate build info
-        run: bash scripts/generate_build_info.sh
+      - name: Create ADI registration properties
+        env:
+          ADI_REGISTRATION_PROPERTIES: ${{ secrets.ADI_REGISTRATION_PROPERTIES }}
+        run: echo "$ADI_REGISTRATION_PROPERTIES" > assets/adi-registration.properties
       - name: Setup release signing
         env:
           KEYSTORE_BASE64:  ${{ secrets.KEYSTORE_BASE64 }}
