@@ -11,41 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^4.0.0
-  # 0.13.x fails on Dart SDK ≥ 3.3 during adaptive-icon generation
-  # (silently skips mipmap-anydpi-v26 output). 0.14+ also unlocks the
-  # `adaptive_icon_monochrome` knob used for Android 13+ themed icons.
-  flutter_launcher_icons: ^0.14.3
-
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
     - assets/icon/
     - assets/adi-registration.properties
-
-# Launcher-icon generation.
-# Regenerate after editing by running:
-#   dart run flutter_launcher_icons
-# The generated PNGs under android/app/src/main/res/mipmap-*/ and
-# mipmap-anydpi-v26/ic_launcher.xml should be committed.
-flutter_launcher_icons:
-  android: "ic_launcher"
-  image_path: "assets/icon/app_icon.png"
-  # Brand colour — keep in sync with AppColors.brand (AppColors.blue800)
-  # and res/values/colors.xml@ic_launcher_background.
-  adaptive_icon_background: "#264AF4"
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
-  # Android 13+ themed icons (requires flutter_launcher_icons ≥ 0.14).
-  # Provide a silhouette PNG if you want a dedicated monochrome mark;
-  # falling back to the foreground yields acceptable results for most
-  # logos.
-  adaptive_icon_monochrome: "assets/icon/app_icon_foreground.png"
-  min_sdk_android: 21
-  # ios section intentionally omitted — no ios/ directory yet.
-  # When iOS is added, re-enable with:
-  #   ios: true
-  #   remove_alpha_ios: true
