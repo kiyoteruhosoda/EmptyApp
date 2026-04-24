@@ -3,11 +3,8 @@ import java.io.FileInputStream
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
-// Release signing — reads android/key.properties written by CI or local dev.
-// See docs/signing.md for setup instructions.
 val keystorePropertiesFile = rootProject.file("key.properties")
 val hasKeystore = keystorePropertiesFile.exists()
 val keystoreProperties = Properties().also { props ->
@@ -29,10 +26,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
     }
 
     signingConfigs {
