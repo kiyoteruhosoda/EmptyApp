@@ -1,19 +1,23 @@
-# flutterbase
+# EmptyApp — ADI Ownership Verification APK
 
-This is a template project for Flutter applications.
+Minimal Android project for [private key ownership verification](https://support.google.com/googleplay/android-developer/answer/16761053#verifying_private_key_ownership_existing_packages_only) of an existing Play Console package.
 
-## Getting Started
+Structure mirrors the Google sample: <https://github.com/android/security-samples/tree/main/AndroidDeveloperVerificationAPKSigningExample>.
 
-To customize this project for your own use, please refer to:
+## Required GitHub secrets
 
-```
-docs/CUSTOMISATION.md
-```
+| Secret | Purpose |
+|---|---|
+| `ADI_REGISTRATION_SNIPPET` | Snippet from Play Console, written to `app/src/main/assets/adi-registration.properties` |
+| `KEYSTORE_BASE64` | Base64-encoded release keystore (the key being verified) |
+| `KEY_ALIAS` | Key alias |
+| `KEY_PASSWORD` | Key password |
+| `STORE_PASSWORD` | Keystore password |
 
-This document serves as a step-by-step guide for adapting the template to your project.
+## Build
 
-## Purpose
+Run the `Build Signing APK` workflow (`workflow_dispatch`). The APK is uploaded as the `signing-apk` artifact.
 
-* Provide a reusable Flutter project structure
-* Standardize initial setup and configuration
-* Accelerate project bootstrapping
+## Package name
+
+Set `namespace` / `applicationId` in `app/build.gradle.kts` to match the Play Console package you are verifying.

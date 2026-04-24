@@ -3,9 +3,6 @@ name: Build Signing APK
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 permissions:
   contents: read
 
@@ -27,6 +24,16 @@ jobs:
         with:
           gradle-version: "8.3"
 
+      - name: Write adi-registration snippet
+        env:
+          ADI_REGISTRATION_SNIPPET: ${{ secrets.ADI_REGISTRATION_SNIPPET }}
+        run: |
+          if [ -z "$ADI_REGISTRATION_SNIPPET" ]; then
+            echo "ADI_REGISTRATION_SNIPPET secret is not set" >&2
+            exit 1
+          fi
+          printf '%s\n' "$ADI_REGISTRATION_SNIPPET" > app/src/main/assets/adi-registration.properties
+
       - name: Setup release signing
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -34,21 +41,20 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          echo "$KEYSTORE_BASE64" | base64 -d > app/release.keystore
           {
-            echo "storeFile=../app/release.keystore"
+            echo "storeFile=release.keystore"
             echo "storePassword=$STORE_PASSWORD"
             echo "keyAlias=$KEY_ALIAS"
             echo "keyPassword=$KEY_PASSWORD"
-          } > android/key.properties
+          } > key.properties
 
       - name: Build release APK
-        working-directory: android
         run: gradle assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: signing-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: app/build/outputs/apk/release/*.apk
           retention-days: 30
