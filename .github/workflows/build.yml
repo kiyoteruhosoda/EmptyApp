@@ -1,10 +1,9 @@
 name: Flutter Build
 
 on:
-  workflow_run:
-    workflows: ["Auto Version Bump"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 concurrency:
   group: flutter-build
@@ -15,7 +14,7 @@ env:
 
 jobs:
   start-runner:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: true
     runs-on: ubuntu-latest
     steps:
       - name: Validate required secrets
@@ -107,7 +106,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref }}
           fetch-depth: 0  # Full history needed for git rev-list --count
       - name: Setup Android SDK permissions
         run: |
@@ -118,8 +116,10 @@ jobs:
           fi
       - name: Flutter pub get
         run: flutter pub get
-      - name: Generate build info
-        run: bash scripts/generate_build_info.sh
+      - name: Create ADI registration properties
+        env:
+          ADI_REGISTRATION_PROPERTIES: ${{ secrets.ADI_REGISTRATION_PROPERTIES }}
+        run: echo "$ADI_REGISTRATION_PROPERTIES" > assets/adi-registration.properties
       - name: Setup release signing
         env:
           KEYSTORE_BASE64:  ${{ secrets.KEYSTORE_BASE64 }}
@@ -141,11 +141,9 @@ jobs:
           fi
       - name: Flutter build APK
         run: flutter build apk --release --build-number=$(git rev-list --count HEAD)
-      - name: Flutter build AAB
-        run: flutter build appbundle --release --build-number=$(git rev-list --count HEAD)
       # Upload the per-app renamed copies written by android/app/build.gradle
       # (see docs/CUSTOMISATION.md §9c).  We exclude the generic
-      # app-release.{apk,aab} that Flutter CLI requires to stay put.
+      # app-release.apk that Flutter CLI requires to stay put.
       - name: Upload APK
         uses: actions/upload-artifact@v5
         with:
@@ -153,14 +151,6 @@ jobs:
           path: |
             build/app/outputs/flutter-apk/*-release.apk
             !build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-      - name: Upload AAB
-        uses: actions/upload-artifact@v5
-        with:
-          name: aab
-          path: |
-            build/app/outputs/bundle/release/*-release.aab
-            !build/app/outputs/bundle/release/app-release.aab
           retention-days: 30
 
   stop-runner:
