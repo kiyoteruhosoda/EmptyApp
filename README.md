@@ -6,20 +6,22 @@ Structure mirrors the Google sample: <https://github.com/android/security-sample
 
 ## Build
 
-Builds run on Azure Pipelines inside an Android build container (`mingc/android-build-box`). See [`azure-pipelines.yml`](azure-pipelines.yml). Trigger manually from Azure DevOps; the APK is published as the `signing-apk` artifact.
+Trigger the `Build Signing APK` workflow manually (`workflow_dispatch`). The workflow spins up a self-hosted GitHub Actions runner on Azure Container Instances via an Azure Function, runs `gradle assembleRelease` on it, publishes the APK as the `signing-apk` artifact, and stops the ACI.
 
-## Required Azure Pipelines configuration
+The runner must register with labels `self-hosted, android` and have Android SDK + Gradle available on `PATH`.
 
-Variable group **`adi-verification`** (linked to Azure Key Vault or stored as secret variables):
+## Required GitHub secrets
 
-| Variable | Purpose |
+| Secret | Purpose |
 |---|---|
+| `FUNC_URL` | Azure Function endpoint that starts the ACI runner |
+| `FUNC_STOP_URL` | Azure Function endpoint that stops the ACI runner |
+| `FUNC_STATUS_URL` | Azure Function endpoint that returns ACI status + logs |
 | `ADI_REGISTRATION_SNIPPET` | Snippet from Play Console, written to `app/src/main/assets/adi-registration.properties` |
-| `STORE_PASSWORD` | Keystore password |
+| `KEYSTORE_BASE64` | Base64-encoded release keystore (the key being verified) |
 | `KEY_ALIAS` | Key alias |
 | `KEY_PASSWORD` | Key password |
-
-Secure file **`release.keystore`**: the release keystore (the key being verified), uploaded under Pipelines → Library → Secure files.
+| `STORE_PASSWORD` | Keystore password |
 
 ## Package name
 
