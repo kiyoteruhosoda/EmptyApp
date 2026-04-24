@@ -4,19 +4,22 @@ Minimal Android project for [private key ownership verification](https://support
 
 Structure mirrors the Google sample: <https://github.com/android/security-samples/tree/main/AndroidDeveloperVerificationAPKSigningExample>.
 
-## Required GitHub secrets
-
-| Secret | Purpose |
-|---|---|
-| `ADI_REGISTRATION_SNIPPET` | Snippet from Play Console, written to `app/src/main/assets/adi-registration.properties` |
-| `KEYSTORE_BASE64` | Base64-encoded release keystore (the key being verified) |
-| `KEY_ALIAS` | Key alias |
-| `KEY_PASSWORD` | Key password |
-| `STORE_PASSWORD` | Keystore password |
-
 ## Build
 
-Run the `Build Signing APK` workflow (`workflow_dispatch`). The APK is uploaded as the `signing-apk` artifact.
+Builds run on Azure Pipelines inside an Android build container (`mingc/android-build-box`). See [`azure-pipelines.yml`](azure-pipelines.yml). Trigger manually from Azure DevOps; the APK is published as the `signing-apk` artifact.
+
+## Required Azure Pipelines configuration
+
+Variable group **`adi-verification`** (linked to Azure Key Vault or stored as secret variables):
+
+| Variable | Purpose |
+|---|---|
+| `ADI_REGISTRATION_SNIPPET` | Snippet from Play Console, written to `app/src/main/assets/adi-registration.properties` |
+| `STORE_PASSWORD` | Keystore password |
+| `KEY_ALIAS` | Key alias |
+| `KEY_PASSWORD` | Key password |
+
+Secure file **`release.keystore`**: the release keystore (the key being verified), uploaded under Pipelines → Library → Secure files.
 
 ## Package name
 

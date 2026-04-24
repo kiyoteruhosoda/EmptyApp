@@ -1,0 +1,60 @@
+trigger: none
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+resources:
+  containers:
+    - container: android
+      image: mingc/android-build-box:latest
+
+jobs:
+  - job: BuildSigningApk
+    displayName: Build Signing APK
+    container: android
+    variables:
+      - group: adi-verification
+    steps:
+      - checkout: self
+
+      - script: |
+          set -eu
+          if [ -z "${ADI_REGISTRATION_SNIPPET:-}" ]; then
+            echo "ADI_REGISTRATION_SNIPPET is not set" >&2
+            exit 1
+          fi
+          printf '%s\n' "$ADI_REGISTRATION_SNIPPET" > app/src/main/assets/adi-registration.properties
+        displayName: Write adi-registration snippet
+        env:
+          ADI_REGISTRATION_SNIPPET: $(ADI_REGISTRATION_SNIPPET)
+
+      - task: DownloadSecureFile@1
+        name: releaseKeystore
+        displayName: Download release keystore
+        inputs:
+          secureFile: release.keystore
+
+      - script: |
+          set -eu
+          cp "$(releaseKeystore.secureFilePath)" app/release.keystore
+          {
+            echo "storeFile=release.keystore"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > key.properties
+        displayName: Configure release signing
+        env:
+          STORE_PASSWORD: $(STORE_PASSWORD)
+          KEY_ALIAS: $(KEY_ALIAS)
+          KEY_PASSWORD: $(KEY_PASSWORD)
+
+      - script: gradle assembleRelease
+        displayName: Build release APK
+
+      - task: PublishPipelineArtifact@1
+        displayName: Publish APK
+        inputs:
+          targetPath: app/build/outputs/apk/release
+          artifact: signing-apk
